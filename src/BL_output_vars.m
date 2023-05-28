@@ -1,0 +1,64 @@
+function outputs = BL_output_vars(t,x,y,xdot)
+
+outputs.x = x;
+outputs.t = t;
+
+outputs.alpha           = y(1,:);
+outputs.alpha_plunge    = y(2,:);
+outputs.alpha_QS        = y(3,:);
+outputs.q_QS            = y(4,:);
+outputs.qR              = y(5,:);
+outputs.R               = y(6,:);
+outputs.alpha_cr        = y(7,:);
+outputs.theta           = y(8,:);
+outputs.theta_min       = y(9,:);
+outputs.theta_max       = y(10,:);
+outputs.S               = y(11,:);
+outputs.P               = y(12,:);
+outputs.T               = y(13,:);
+outputs.alpha1_n        = y(14,:);
+outputs.alpha1_m        = y(15,:);
+outputs.alpha1_c        = y(16,:);
+outputs.dalpha1_n       = y(17,:);
+outputs.dalpha1_m       = y(18,:);
+outputs.dalpha1_c       = y(19,:);
+outputs.f_n             = y(20,:);
+outputs.f_m             = y(21,:);
+outputs.f_c             = y(22,:);
+outputs.fprime_n        = y(23,:);
+outputs.fprime_m        = y(24,:);
+outputs.fprime_c        = y(25,:);
+outputs.Tf_n            = y(26,:);
+outputs.Tf_m            = y(27,:);
+outputs.Tf_c            = y(28,:);
+outputs.Ta_theta        = y(29,:);
+outputs.alpha_C         = y(30,:);
+outputs.c_n             = y(31,:);
+outputs.c_nC            = y(32,:);
+outputs.c_nI            = y(33,:);
+outputs.c_nf            = y(34,:);
+outputs.c_nv            = y(35,:);
+outputs.c_m             = y(36,:);
+outputs.c_mC            = y(37,:);
+outputs.c_mI            = y(38,:);
+outputs.c_mf            = y(39,:);
+outputs.c_mv            = y(40,:);
+outputs.dCP             = y(41,:);
+outputs.c_c             = y(42,:);
+outputs.RD_tv0          = y(43,:);
+outputs.f_diff_tv0      = y(44,:);
+outputs.TvL_tv0         = y(45,:);
+outputs.f_diff_tv0_2    = y(46,:);
+outputs.qR_max          = y(47,:);
+outputs.Uc              = y(48,:);
+outputs.c_l = outputs.c_n.*cos(outputs.alpha)+outputs.c_c.*sin(outputs.alpha);
+outputs.c_d = outputs.c_n.*sin(outputs.alpha)-outputs.c_c.*cos(outputs.alpha);
+
+outputs.alpha_lag = atan(x(9,:)./outputs.Uc);
+outputs.f2prime_n = x(10,:);
+outputs.f2prime_m = x(11,:);
+outputs.f2prime_c = x(12,:);
+outputs.RD = x(13,:);
+outputs.RD_theta = x(14,:);
+
+end

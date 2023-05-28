@@ -1,0 +1,308 @@
+function varargout = SelectedFiles(varargin)
+% SELECTEDFILES M-file for SelectedFiles.fig
+%      SELECTEDFILES, by itself, creates a new SELECTEDFILES or raises the existing
+%      singleton*.
+%
+%      H = SELECTEDFILES returns the handle to a new SELECTEDFILES or the handle to
+%      the existing singleton*.
+%
+%      SELECTEDFILES('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in SELECTEDFILES.M with the given input arguments.
+%
+%      SELECTEDFILES('Property','Value',...) creates a new SELECTEDFILES or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before SelectedFiles_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to SelectedFiles_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help SelectedFiles
+
+% Last Modified by GUIDE v2.5 06-Sep-2013 15:52:03
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @SelectedFiles_OpeningFcn, ...
+                   'gui_OutputFcn',  @SelectedFiles_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+               %varargin{1}
+if nargin && ischar(varargin{1})
+    if strfind(varargin{1},':\')==2
+        % Trick on varargin check to avoid warnings
+    elseif strfind(varargin{1},'/U')== 1
+         % Trick on varargin check to avoid warnings   
+    else
+        varargin{1}
+        gui_State.gui_Callback = str2func(varargin{1});
+    end
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before SelectedFiles is made visible.
+ function SelectedFiles_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to SelectedFiles (see VARARGIN)
+
+% Choose default command line output for SelectedFiles
+handles.output = hObject;
+handles.filename = 'no_file';
+
+
+% Build list
+folder_name = varargin{1};
+selected_files = varargin{2};
+infos = varargin{3};
+RIBs_info = varargin{4};
+
+if ispc
+    slash='\';
+else
+    slash='/';
+end
+data_name = strcat(folder_name,slash,'*.dat');
+d = dir(data_name);
+
+files_find = find(selected_files==1);
+N = length(files_find);
+
+
+posT = get(handles.table_cases, 'Position');
+posF = get(gcf, 'Position');
+
+if strcmp(infos,'110') == 1
+    
+    dat_list = cell(N,5);
+    for i = 1 : N
+        dat_list(i,1) = {d(files_find(i)).name(1:8)};
+        dat_list(i,2) = {num2str(RIBs_info(files_find(i),5))};
+        dat_list(i,3) = {num2str(RIBs_info(files_find(i),6))};
+        dat_list(i,4) = {RIBs_info(files_find(i),20)};
+        dat_list(i,5) = {RIBs_info(files_find(i),21)};
+    end
+    cnames = {'Run number', 'T(C)', 'P(mmHg)', 'Re', 'Ma'};
+    posT(3) = 60;
+    set(handles.table_cases,'Data',dat_list,...
+        'ColumnName',cnames, 'ColumnWidth',{70 40 60 60 50},...
+        'ColumnFormat', {'char', 'char', 'char', 'char', 'char'},...
+        'Position',posT);
+    posF(3) = posT(3)+32;
+    set(gcf, 'Position', posF)
+
+elseif strcmp(infos,'101') == 1
+    
+    dat_list = cell(N,6);
+    for i = 1 : N
+        dat_list(i,1) = {d(files_find(i)).name(1:8)};
+        dat_list(i,2) = {RIBs_info(files_find(i),7)};
+        dat_list(i,3) = {num2str(RIBs_info(files_find(i),8))};
+        dat_list(i,4) = {num2str(RIBs_info(files_find(i),9))};
+        dat_list(i,5) = {RIBs_info(files_find(i),10)};
+        dat_list(i,6) = {RIBs_info(files_find(i),22)};
+    end
+    
+    if all(cell2mat(dat_list(:,2))==cell2mat(dat_list(1,2))) == 1
+        cwidth = {70 70 65 65 65};
+        cform = {'char', 'char', 'char', 'char', 'char'};
+        posT(3) = 71;
+        switch dat_list{1,2}
+            case 0
+                dat_list = dat_list(:,[1:end-2]);
+                cnames = {'Starting|incidence', 'Arc'};
+                cwidth = {70 70 55};
+                cform = {'char', 'char', 'char'};
+                posT(3) = 43;
+            case 4
+                dat_list = dat_list(:,[1:end-2]);
+                cnames = {'Nominal angle|of attack', 'Averaged|incidence'};
+                cwidth = {70 82 55};
+                cform = {'char', 'char', 'char'};
+                posT(3) = 46;
+            case {1,5}
+                cnames = {'Mean|incidence', 'Amplitude', 'Oscillation|frequency', 'Reduced|frequency'};
+            case {2,3}
+                cnames = {'Starting|incidence', 'Ramp arc', 'Linear|pitch rate', 'Reduced|pitch rate'};
+            case 7
+                cnames = {'Mean|incidence', 'Tip speed|ratio', 'Oscillation|frequency', 'Reduced|frequency'};
+        end
+        dat_list = dat_list(:,[1,3:end]);
+        cnames = {'Run number', cnames{:}};
+        
+    else
+        cnames = {'Run number', 'Motion|type',...
+                  '0/2/3 Starting incidence|4 Nominal angle of attack|1/5/7 Mean incidence',...
+                  '0 Arc|4 Averaged incidence|1/5 Amplitude|2/3 Ramp arc|7 Tip speed ratio',...
+                  '1/5/7 Oscillation frequency|2/3 Linear pitch rate',...
+                  '1/5/7 Reduced frequency|2/3 Reduced pitch rate'};
+        cwidth = {70 45 140 117 147 137};
+        cform = {'char', 'char', 'char', 'char', 'char', 'char'};
+        posT(3) = 135;
+    end
+    
+    set(handles.table_cases,'Data',dat_list,...
+        'ColumnName',cnames, 'ColumnWidth',cwidth, 'ColumnFormat',cform,...
+        'Position',posT);
+    posF(3) = posT(3)+32;
+    set(gcf, 'Position', posF)
+    
+elseif strcmp(infos,'111') == 1
+    
+    dat_list = cell(N,10);
+    for i = 1 : N
+        dat_list(i,1) = {d(files_find(i)).name(1:8)};
+        dat_list(i,2) = {num2str(RIBs_info(files_find(i),5))};
+        dat_list(i,3) = {num2str(RIBs_info(files_find(i),6))};
+        dat_list(i,4) = {RIBs_info(files_find(i),20)};
+        dat_list(i,5) = {RIBs_info(files_find(i),21)};
+        dat_list(i,6) = {RIBs_info(files_find(i),7)};
+        dat_list(i,7) = {num2str(RIBs_info(files_find(i),8))};
+        dat_list(i,8) = {num2str(RIBs_info(files_find(i),9))};
+        dat_list(i,9) = {RIBs_info(files_find(i),10)};
+        dat_list(i,10) = {RIBs_info(files_find(i),22)};
+    end
+    
+    if all(cell2mat(dat_list(:,6))==cell2mat(dat_list(1,6))) == 1
+        cwidth = {70 40 60 60 50 70 65 65 65};
+        cform = {'char', 'char', 'char', 'char', 'char', 'char', 'char', 'char', 'char'};
+        posT(3) = 113;
+        switch dat_list{1,6}
+            case 0
+                dat_list = dat_list(:,[1:end-2]);
+                cnames = {'Starting|incidence', 'Arc'};
+                cwidth = {cwidth{1:5} 70 55};
+                cform = {'char', 'char', 'char', 'char', 'char', 'char', 'char'};
+                posT(3) = 85;
+            case 4
+                dat_list = dat_list(:,[1:end-2]);
+                cnames = {'Nominal angle|of attack', 'Averaged|incidence'};
+                cwidth = {cwidth{1:5} 82 55};
+                cform = {'char', 'char', 'char', 'char', 'char', 'char', 'char'};
+                posT(3) = 88;
+            case {1,5}
+                cnames = {'Mean|incidence', 'Amplitude', 'Oscillation|frequency', 'Reduced|frequency'};
+            case {2,3}
+                cnames = {'Starting|incidence', 'Ramp arc', 'Linear|pitch rate', 'Reduced|pitch rate'};
+            case 7
+                cnames = {'Mean|incidence', 'Tip speed|ratio', 'Oscillation|frequency', 'Reduced|frequency'};
+        end
+        dat_list = dat_list(:,[1:5,7:end]);
+        cnames = {'Run number', 'T(C)', 'P(mmHg)', 'Re', 'Ma', cnames{:}};
+        
+    else
+        cnames = {'Run number', 'T(C)', 'P(mmHg)', 'Re', 'Ma', 'Motion|type',...
+                  '0/2/3 Starting incidence|4 Nominal angle of attack|1/5/7 Mean incidence',...
+                  '0 Arc|4 Averaged incidence|1/5 Amplitude|2/3 Ramp arc|7 Tip speed ratio',...
+                  '1/5/7 Oscillation frequency|2/3 Linear pitch rate',...
+                  '1/5/7 Reduced frequency|2/3 Reduced pitch rate'};
+        cwidth = {70 40 60 60 50 45 140 117 147 137};
+        cform = {'char', 'char', 'char', 'char', 'char', 'char', 'char', 'char', 'char', 'char'};
+        posT(3) = 177;
+    end
+    
+    set(handles.table_cases,'Data',dat_list,...
+        'ColumnName',cnames, 'ColumnWidth',cwidth, 'ColumnFormat',cform,...
+        'Position',posT);
+    posF(3) = posT(3)+32;
+    set(gcf, 'Position', posF)
+        
+else
+    dat_list = cell(N,1);
+    for i = 1 : N
+        dat_list(i) = {d(files_find(i)).name(1:8)};
+    end
+    cnames = {'Run number'};
+    posT(3) = [18];
+    set(handles.table_cases,'Data',dat_list,...
+        'ColumnName',cnames, 'ColumnWidth',{70}, 'ColumnFormat', {'char'},...
+        'Position',posT);
+end
+
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes SelectedFiles wait for user response (see UIRESUME)
+uiwait(handles.figure1)
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = SelectedFiles_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% OutputFCN
+varargout{1} = handles.filename;
+
+% The figure can be deleted now
+delete(handles.figure1);
+
+
+% --- Executes on button press in select_case.
+function select_case_Callback(hObject, eventdata, handles)
+% hObject    handle to select_case (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+guidata(hObject,handles);
+close(gcf)
+
+
+% --- Executes on button press in close_window.
+function close_window_Callback(hObject, eventdata, handles)
+% hObject    handle to close_window (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.filename = 'no_file';
+
+guidata(hObject,handles);
+close(gcf)
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isequal(get(hObject, 'waitstatus'), 'waiting')
+    % The GUI is still in UWAIT, us UIRESUME
+    uiresume(hObject);
+else
+    % The GUI is no longer waiting, just close it
+    delete(hObject);
+end
+
+
+% --- Executes when selected cell(s) is changed in table_cases.
+function table_cases_CellSelectionCallback(hObject, eventdata, handles)
+% hObject    handle to table_cases (see GCBO)
+% eventdata  structure with the following fields (see UITABLE)
+%	Indices: row and column indices of the cell(s) currently selecteds
+% handles    structure with handles and user data (see GUIDATA)
+
+row = eventdata.Indices(1,1);
+data = get(handles.table_cases,'Data');
+
+handles.filename = strcat(data{row,1}, '.dat');
+set(handles.edit_selectedcase,'String',data{row,1})
+
+guidata(hObject,handles);
